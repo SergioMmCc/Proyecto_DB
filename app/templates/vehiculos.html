@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehículos Registrados</title>
+</head>
+<body>
+    <h1>Vehículos Registrados</h1>
+    <ul>
+    {% for vehiculo in vehiculos %}
+        <li>{{ vehiculo.placa }} - {{ vehiculo.marca }} {{ vehiculo.modelo }} - {{ vehiculo.color }}</li>
+    {% endfor %}
+    </ul>
+    <a href="{{ url_for('index') }}">Volver al inicio</a>
+</body>
+</html>
