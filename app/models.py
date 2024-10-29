@@ -11,7 +11,7 @@ class Vehiculos(db.Model):
     modelo = db.Column(db.String(30), nullable=False, index=True)
     color = db.Column(db.String(15), nullable=False)
     id_duenio = db.Column(db.Integer, db.ForeignKey('duenios.id_duenio'), nullable=False, index=True)
-    tipo_vehiculo = db.Column(db.Enum('carro', 'moto', name='tipo_vehiculo_enum'), nullable=False)
+    tipo = db.Column(db.Enum('carro', 'moto', name='tipo_enum'), nullable=False)
     id_plaza = db.Column(db.Integer, db.ForeignKey('plazas.id_plaza'), nullable=True, unique=True)
     activo = db.Column(Boolean, default=True)
 
@@ -30,7 +30,7 @@ class Plazas(db.Model):
     __tablename__ = 'plazas'
 
     id_plaza = db.Column(db.Integer, primary_key=True)
-    tipo_plaza = db.Column(db.Enum('carro', 'moto', name='tipo_plaza_enum'), nullable=False)
+    tipo = db.Column(db.Enum('carro', 'moto', name='tipo_plaza_enum'), nullable=False)
     estado = db.Column(db.Enum('disponible', 'no disponible', name='estado_enum'), nullable=False)
 
 # Tabla registro_estancias
@@ -52,7 +52,6 @@ class Facturas(db.Model):
     id_estancia = db.Column(db.Integer, db.ForeignKey('registro_estancias.id_estancia'), nullable=False, unique=True)
     fecha_hora_entrada = db.Column(db.DateTime, nullable=False)
     fecha_hora_salida = db.Column(db.DateTime, nullable=False)
-    tiempo_estancia = db.Column(db.Interval, nullable=False)
     monto = db.Column(db.Integer, nullable=False)
     id_vehiculo = db.Column(db.Integer, db.ForeignKey('vehiculos.id_vehiculo'), nullable=False, index=True)
     placa = db.Column(db.String(6), nullable=False, index=True)

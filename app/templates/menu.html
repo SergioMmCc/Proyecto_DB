@@ -13,9 +13,9 @@
             <div class="opciones">
                 <h2>Registrar</h2>
                 <div class="botones">
-                    <button onclick="location.href='/ingreso'">Registrar Ingreso</button>
-                    <button onclick="location.href='/salida'">Registrar Salida</button>
-                    <button onclick="location.href='/plazas'">Registrar Plaza</button>
+                    <button onclick="window.location.href='{{ url_for('main.ingreso') }}'">Registrar Ingreso</button>
+                    <button onclick="window.location.href='{{ url_for('main.salida') }}'">Registrar Salida</button><br>
+                    <button onclick="window.location.href='{{ url_for('main.agregar_plaza') }}'">Agregar Plaza</button>
                 </div>
             </div>
             <div class="opciones">

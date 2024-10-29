@@ -44,32 +44,49 @@ def index():
 # Registros -----------------------------------------------------------------------------------------------
 # Ruta para registrar un vehículo
 @main.route('/registrar_vehiculo', methods=['GET', 'POST'])
-def registrar_vehiculo(placa):
+def registrar_vehiculo():
+    placa = session.get('placa')  # Obtener placa de la URL, si existe
+    tipo_usuario = session.get('usuario')
     if request.method == 'POST':
         marca = request.form['marca']
         modelo = request.form['modelo']
         color = request.form['color']
-        tipo_vehiculo = request.form['tipo_vehiculo']
-        cedula_duenio = request.form['cedula_duenio']
+        tipo = request.form['tipo']
+        cedula = request.form['cedula']
         
         # Buscar el duenio por cédula
-        duenio = Duenios.query.filter_by(cedula=cedula_duenio).first()
+        duenio = Duenios.query.filter_by(cedula=cedula).first()
         if not duenio:
-            registrar_duenio(cedula_duenio)
-            duenio = Duenios.query.filter_by(cedula=cedula_duenio).first()
+            session['usuario'] = tipo_usuario
+            session['placa'] = placa
+            session['cedula'] = cedula
+            session['marca'] = marca
+            session['modelo'] = modelo
+            session['color'] = color
+            session['tipo'] = tipo
+            return redirect(url_for('main.registrar_duenio'))
         if duenio.activo==False:
             duenio.activo=True
             db.session.commit()
 
-        vehiculo = Vehiculos(placa=placa, marca=marca, modelo=modelo, color=color, id_duenio=duenio.id_duenio, tipo_vehiculo=tipo_vehiculo, activo=True)
+        vehiculo = Vehiculos(placa=placa, marca=marca, modelo=modelo, color=color, id_duenio=duenio.id_duenio, tipo=tipo, activo=True)
         db.session.add(vehiculo)
         db.session.commit()
 
-    return render_template('registrar_vehiculos.html')
+        asignar_plaza(vehiculo)
 
-# Ruta para registrar un duenio
+        if tipo_usuario == 'admin':
+            return render_template('menu_admin.html')
+        else:
+            return render_template('menu.html')
+
+    return render_template('registrar_vehiculo.html')
+
+# Ruta para registrar un dueño
 @main.route('/registrar_duenio', methods=['GET', 'POST'])
-def registrar_duenio(cedula):
+def registrar_duenio():
+    cedula = session.get('cedula')  # Obtener cédula de la URL, si existe
+    tipo_usuario = session.get('usuario')
     if request.method == 'POST':
         nombre = request.form['nombre']
         telefono = request.form['telefono']
@@ -78,44 +95,71 @@ def registrar_duenio(cedula):
         db.session.add(duenio)
         db.session.commit()
 
-    return render_template('registrar_duenios.html')
+        # Obtener los datos del vehículo
+        placa = session.get('placa')
+        marca = session.get('marca')
+        modelo = session.get('modelo')
+        color = session.get('color')
+        tipo = session.get('tipo')
+
+        # Crear el vehículo
+        vehiculo = Vehiculos(placa=placa, marca=marca, modelo=modelo, color=color, id_duenio=duenio.id_duenio, tipo=tipo, activo=True)
+        db.session.add(vehiculo)
+        db.session.commit()
+
+        asignar_plaza(vehiculo)
+        
+        if tipo_usuario == 'admin':
+            return render_template('menu_admin.html')
+        else:
+            return render_template('menu.html')
+
+    return render_template('registrar_duenio.html')
 
 # Ruta para registrar el ingreso de un vehículo
 @main.route('/ingreso', methods=['GET', 'POST'])
 def ingreso():
+    tipo_usuario = session.get('usuario')
     if request.method == 'POST':
         placa = request.form['placa']
+
         # Buscar el vehículo por placa
         vehiculo = Vehiculos.query.filter_by(placa=placa).first()
         if not vehiculo:
-            registrar_vehiculo(placa)
-            vehiculo = Vehiculos.query.filter_by(placa=placa).first()
+            session['placa'] = placa
+            session['usuario'] = tipo_usuario
+            return redirect(url_for('main.registrar_vehiculo'))
         if vehiculo.activo==False:
             vehiculo.activo=True
             db.session.commit()
+        if vehiculo.id_plaza is not None:
+            return "El vehículo ya está estacionado.", 403
 
-        # Buscar una plaza disponible
-        if vehiculo.tipo_vehiculo == 'carro':
-            plaza = Plazas.query.filter_by(tipo_plaza='carro', estado='disponible', activo=True).first()
-        else:
-            plaza = Plazas.query.filter_by(tipo_plaza='moto', estado='disponible', activo=True).first()
-        if not plaza:
-            return "No hay plazas disponibles.", 404
+        asignar_plaza(vehiculo)
         
-        # Marcar la plaza como no disponible
-        plaza.estado = 'no disponible'
-
-        # Asignar la plaza al vehículo
-        vehiculo.id_plaza = plaza.id_plaza
-
-        # Crear un registro de estancia
-        estancia = RegistroEstancias(id_vehiculo=vehiculo.id_vehiculo, id_plaza=plaza.id_plaza, fecha_hora_entrada=datetime.now(), estado='en proceso')
-        db.session.add(estancia)
-
-        db.session.commit()
-        return redirect(url_for('main.vehiculos'))
+        if tipo_usuario == 'admin':
+            return render_template('menu_admin.html')
+        else:
+            return render_template('menu.html')
     
     return render_template('ingreso.html')
+
+# Funcion para asignar una plaza a un vehiculo
+def asignar_plaza(vehiculo):
+    if vehiculo.tipo == 'carro':
+        plaza = Plazas.query.filter_by(tipo='carro', estado='disponible').first()
+    else:
+        plaza = Plazas.query.filter_by(tipo='moto', estado='disponible').first()
+    if not plaza:
+        return "No hay plazas disponibles.", 404
+    plaza.estado = 'no disponible'
+    vehiculo.id_plaza = plaza.id_plaza
+    db.session.commit()
+
+    # Crear un registro de estancia
+    estancia = RegistroEstancias(id_vehiculo=vehiculo.id_vehiculo, id_plaza=plaza.id_plaza, fecha_hora_entrada=datetime.now(), estado='en proceso')
+    db.session.add(estancia)
+    db.session.commit()
 
 # Función para calcular el monto a pagar por la estancia
 def calcular_monto(tiempo_estancia):
@@ -123,10 +167,13 @@ def calcular_monto(tiempo_estancia):
     monto = 0
     if tiempo_estancia.days > 0:
         monto += 20000 * tiempo_estancia.days
-    if tiempo_estancia.hours > 0:
-        monto += 2000 * tiempo_estancia.hours
-    if tiempo_estancia.minutes > 0 or tiempo_estancia.seconds > 0:
-        monto += 2000
+    hours = tiempo_estancia.seconds // 3600
+    if hours >= 10:
+        monto += 20000
+    elif hours > 0:
+        monto += 2000 * hours
+        if tiempo_estancia.seconds % 3600 > 0:
+            monto += 2000
 
     return monto
 
@@ -145,7 +192,7 @@ def generar_factura(vehiculo, duenio):
 
         # Crear la factura
         factura = Facturas(id_estancia=estancia.id_estancia, fecha_hora_entrada=estancia.fecha_hora_entrada,
-                           fecha_hora_salida=estancia.fecha_hora_salida, tiempo_estancia=tiempo_estancia, monto=monto,
+                           fecha_hora_salida=estancia.fecha_hora_salida, monto=monto,
                            id_vehiculo=vehiculo.id_vehiculo, placa=vehiculo.placa, id_duenio=duenio.id_duenio,
                            cedula_duenio=duenio.cedula)
 
@@ -167,42 +214,58 @@ def salida():
         # Buscar el vehículo por placa
         vehiculo = Vehiculos.query.filter_by(placa=placa).first()
 
-        if vehiculo:
-            # Obtener el duenio del vehículo
-            duenio = Duenios.query.get(vehiculo.id_duenio)
+        if not vehiculo:
+            return "La placa no coincide con ningún vehículo.", 404
+        
+        # Buscar el dueño por cedula
+        duenio = Duenios.query.filter_by(cedula=cedula).first()
 
-            if duenio and duenio.cedula == cedula:  # Verificar que la cédula coincida
-                # Buscar la estancia en proceso para el vehículo
-                estancia = RegistroEstancias.query.filter_by(id_vehiculo=vehiculo.id_vehiculo, estado='en proceso').first()
+        if not duenio:
+            return "La cedula no coincide con ningún dueño.", 404
 
-                if estancia:
-                    # Hora de salida
-                    estancia.fecha_hora_salida = datetime.now()
+        if vehiculo.id_duenio == duenio.id_duenio:  # Verificar que la cédula coincida
+            if duenio.activo == False:
+                duenio.activo=True
+                db.session.commit()
 
-                    # Generar la factura
-                    factura = generar_factura(vehiculo, duenio)
+            # Buscar la estancia en proceso para el vehículo
+            estancia = RegistroEstancias.query.filter_by(id_vehiculo=vehiculo.id_vehiculo, estado='en proceso').first()
 
-                    # Actualizar estado de la estancia a 'finalizada'
-                    estancia.estado = 'finalizada'
-
-                    # Actualizar estado de la plaza a 'disponible'
-                    plaza = Plazas.query.get(estancia.id_plaza)
-                    if plaza:
-                        plaza.estado = 'disponible'
-
-                    # Actualizar id_plaza del vehículo a NULL
-                    vehiculo.id_plaza = None
-
-                    # Guardar los cambios en la base de datos
+            if estancia:
+                # Verificar actividad del vehículo
+                if vehiculo.activo == False:
+                    vehiculo.activo=True
                     db.session.commit()
 
-                    return redirect(url_for('main.vehiculos'))
+                # Hora de salida
+                estancia.fecha_hora_salida = datetime.now()
+
+                # Generar la factura
+                factura = generar_factura(vehiculo, duenio)
+
+                # Actualizar estado de la estancia a 'finalizada'
+                estancia.estado = 'finalizada'
+
+                # Actualizar estado de la plaza a 'disponible'
+                plaza = Plazas.query.get(estancia.id_plaza)
+                if plaza:
+                    plaza.estado = 'disponible'
+
+                # Actualizar id_plaza del vehículo a NULL
+                vehiculo.id_plaza = None
+
+                # Guardar los cambios en la base de datos
+                db.session.commit()
+
+                if session.get('usuario') == 'admin':
+                    return render_template('menu_admin.html')
                 else:
-                    return "No hay estancia en proceso para este vehículo.", 404
+                    return render_template('menu.html')
+                # return render_template('factura.html', factura=factura)
             else:
-                return "La cédula no coincide con el duenio del vehículo.", 403
+                return "El vehiculo ya no se encuentra en el parqueadero.", 404
         else:
-            return "Vehículo no encontrado.", 404
+            return "La cédula no coincide con el duenio del vehículo.", 403
 
     return render_template('salida.html')
 
@@ -280,13 +343,17 @@ def registrar_usuario():
 @main.route('/agregar_plaza', methods=['GET', 'POST'])
 def agregar_plaza():
     if request.method == 'POST':
-        tipo_plaza = request.form['tipo_plaza']
-        estado = request.form['estado']
+        tipo = request.form['tipo']
 
-        plaza = Plazas(tipo_plaza=tipo_plaza, estado=estado)
+        plaza = Plazas(tipo=tipo, estado='disponible')
         db.session.add(plaza)
         db.session.commit()
 
+        if session.get('usuario') == 'admin':
+            return render_template('menu_admin.html')
+        else:
+            return render_template('menu.html')
+    
     return render_template('agregar_plaza.html')
 
 # # Actualizaciones ------------------------------------------------------------------------------------------------------

@@ -13,10 +13,10 @@
             <div class="opciones">
                 <h2>Registrar</h2>
                 <div class="botones">
-                    <button onclick="location.href='/ingreso'">Registrar Ingreso</button>
-                    <button onclick="location.href='/salida'">Registrar Salida</button><br>
-                    <button onclick="location.href='/agregar_plaza'">Registrar Plaza</button>
-                    <button onclick="location.href='/cedula_empleado'">Registrar Empleado</button>
+                    <button onclick="window.location.href='{{ url_for('main.ingreso') }}'">Registrar Ingreso</button>
+                    <button onclick="window.location.href='{{ url_for('main.salida') }}'">Registrar Salida</button><br>
+                    <button onclick="window.location.href='{{ url_for('main.agregar_plaza') }}'">Agregar Plaza</button>
+                    <button onclick="window.location.href='{{ url_for('main.cedula_empleado') }}'">Registrar Empleado</button>
                 </div>
             </div>
             <div class="opciones">
