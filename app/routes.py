@@ -191,10 +191,8 @@ def generar_factura(vehiculo, duenio):
         monto = calcular_monto(tiempo_estancia)
 
         # Crear la factura
-        factura = Facturas(id_estancia=estancia.id_estancia, fecha_hora_entrada=estancia.fecha_hora_entrada,
-                           fecha_hora_salida=estancia.fecha_hora_salida, monto=monto,
-                           id_vehiculo=vehiculo.id_vehiculo, placa=vehiculo.placa, id_duenio=duenio.id_duenio,
-                           cedula_duenio=duenio.cedula)
+        factura = Facturas(id_estancia=estancia.id_estancia, monto=monto,
+                           id_vehiculo=vehiculo.id_vehiculo, id_duenio=duenio.id_duenio)
 
         # Guardar los cambios en la base de datos
         db.session.add(factura)
@@ -519,12 +517,25 @@ def mostrar_plazas():
 
 # Eliminaciones --------------------------------------------------------------------------------------------------------
 # Ruta para eliminar un vehículo
-@main.route('/eliminar_vehiculo', methods=['POST'])
-def eliminar_vehiculo(id_vehiculo):
-    vehiculo = Vehiculos.query.get(id_vehiculo)
-    vehiculo.activo=False
-    db.session.commit()
-    return redirect(url_for('mostrar_vehiculos'))
+@main.route('/eliminar_vehiculo', methods=['GET', 'POST'])
+def eliminar_vehiculo():
+    if request.method == 'POST':
+        placa = request.form['placa']
+
+        # Buscar el vehículo por placa
+        vehiculo = Vehiculos.query.filter_by(placa=placa).first()
+        if not vehiculo or vehiculo.activo==False:
+            return "El vehiculo no fue encontrado.", 404
+        if vehiculo.id_plaza is not None:
+            return "El vehiculo no puede ser eliminado porque está estacionado.", 404
+    
+        vehiculo.activo=False
+        db.session.commit()
+        if session.get('usuario') == 'admin':
+            return render_template('menu_admin.html')
+        else:
+            return render_template('menu.html')
+    return render_template('eliminar_vehiculo.html')
 
 # Ruta para eliminar un duenio
 @main.route('/eliminar_duenio', methods=['POST'])

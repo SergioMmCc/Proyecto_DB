@@ -50,13 +50,9 @@ class Facturas(db.Model):
 
     id_factura = db.Column(db.Integer, primary_key=True)
     id_estancia = db.Column(db.Integer, db.ForeignKey('registro_estancias.id_estancia'), nullable=False, unique=True)
-    fecha_hora_entrada = db.Column(db.DateTime, nullable=False)
-    fecha_hora_salida = db.Column(db.DateTime, nullable=False)
     monto = db.Column(db.Integer, nullable=False)
     id_vehiculo = db.Column(db.Integer, db.ForeignKey('vehiculos.id_vehiculo'), nullable=False, index=True)
-    placa = db.Column(db.String(6), nullable=False, index=True)
     id_duenio = db.Column(db.Integer, db.ForeignKey('duenios.id_duenio'), nullable=False, index=False)
-    cedula_duenio = db.Column(db.Integer, nullable=False, index=True)
 
 # Tabla empleados
 class Empleados(db.Model):
