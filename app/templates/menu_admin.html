@@ -1,24 +1,55 @@
-<!-- admin_menu.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/css/estilos_generales.css">
-    <link rel="stylesheet" href="../static/css/menu_admin.css">
-    <title>Panel de Administrador - ParqueaSmart</title>
+    <title>Menú Administrador</title>
 </head>
 <body>
     <div class="container">
-        <h2>Panel de Administrador</h2>
-        <div class="options">
-            <button onclick="window.location.href='ingreso.html'">Registrar Ingreso</button>
-            <button onclick="window.location.href='salida.html'">Registrar Salida</button>
-            <button onclick="window.location.href='informacion.html'">Revisar Información</button>
-            <button onclick="window.location.href='agregar_empleado.html'">Agregar Empleado</button>
-            <button onclick="window.location.href='cambiar_empleado.html'">Cambiar Información de Empleado</button>
-            <button onclick="window.location.href='eliminar_empleado.html'">Eliminar Empleado</button>
-            <button onclick="window.location.href='consultar_empleados.html'">Consultar Empleados</button>
+        <h1>Menú Administrador</h1>
+        <div>
+            <div class="opciones">
+                <h2>Registrar</h2>
+                <div class="botones">
+                    <button onclick="location.href='/ingreso'">Registrar Ingreso</button>
+                    <button onclick="location.href='/salida'">Registrar Salida</button><br>
+                    <button onclick="location.href='/agregar_plaza'">Registrar Plaza</button>
+                    <button onclick="location.href='/cedula_empleado'">Registrar Empleado</button>
+                </div>
+            </div>
+            <div class="opciones">
+                <h2>Consultar</h2>
+                <div class="botones">
+                    <button onclick="location.href='/consultar_todos_vehiculos'">Consultar Vehículos</button>
+                    <button onclick="location.href='/solicitar_placa'">Consultar un Vehículo</button><br>
+                    <button onclick="location.href='/consultar_todos_duenos'">Consultar Dueños</button>
+                    <button onclick="location.href='/solicitar_cedula'">Consultar un Dueño</button><br>
+                    <button onclick="location.href='/consultar_todas_facturas'">Consultar Facturas</button>
+                    <button onclick="location.href='/solicitar_placa'">Consultar una Factura</button><br>
+                    <button onclick="location.href='/consultar_todos_empleados'">Consultar Empleados</button>
+                    <button onclick="location.href='/solicitar_cedula'">Consultar un Empleado</button><br>
+                    <button onclick="location.href='/consultar_todas_plazas'">Consultar Plazas</button>
+                </div>
+            </div>
+            <div class="opciones">
+                <h2>Actualizar</h2>
+                <div class="botones">
+                    <button onclick="location.href='/registrar_vehiculo'">Actualizar Vehículo</button>
+                    <button onclick="location.href='/registrar_duenio'">Actualizar Dueño</button>
+                    <button onclick="location.href='/cedula_empleado'">Actualizar Empleado</button><br>
+                    <button onclick="location.href='/registrar_usuario'">Cambiar Credenciales de Usuario</button>
+                </div>
+            </div>
+            <div class="opciones">
+                <h2>Eliminar</h2>
+                <div class="botones">
+                    <button onclick="location.href='/eliminar_vehiculo'">Eliminar Vehículo</button>
+                    <button onclick="location.href='/eliminar_duenio'">Eliminar Dueño</button>
+                    <button onclick="location.href='/eliminar_empleado'">Eliminar Empleado</button>
+                </div>
+            </div>
         </div>
     </div>
 </body>

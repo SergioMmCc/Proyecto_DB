@@ -1,57 +1,136 @@
-/* estilos_generales.css */
+/* Definimos la paleta de colores */
+:root {
+    --color-principal: #34495e;
+    --color-secundario: #2ecc71;
+    --color-fondo: #ecf0f1;
+    --color-texto: #2c3e50;
+    --color-boton: #3498db;
+    --color-boton-hover: #2980b9;
+}
+
+/* Configuración de la fuente y el fondo */
 body {
     font-family: Arial, sans-serif;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
 }
 
+/* Estilos generales de los contenedores */
 .container {
     width: 90%;
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: white;
     padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Estilos generales de las opciones */
+.opciones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 10px;
+    margin-top: 20px;
+    grid-template-areas: "ti ti ti"
+                         "bo bo bo"
+                         "bo bo bo";
+}
+
+h2 {
+    grid-area: ti;
+    align-self: center;
+}
+
+.botones {
+    grid-area: bo;
+    justify-self: center;
+    align-self: center;
+    justify-items: center;
+    align-items: center;
+}
+
+.botones button {
+    margin: 10px 10px 10px 10px;
+    align-self: center;
+    justify-self: center;
+}
+
+
+/* Estilos de encabezados */
 h1, h2 {
-    color: #333;
+    color: var(--color-principal);
+    text-align: center;
 }
 
-h3 {
-    margin-bottom: 10px;
-    margin-top: 30px;
-    font-size: 20px;
-}
-
+/* Estilos de botones */
 button {
-    background-color: #2e86de;
-    color: white;
-    border: none;
+    display: inline-block;
     padding: 10px 20px;
-    cursor: pointer;
+    font-size: 16px;
+    color: white;
+    background-color: var(--color-boton);
+    border: none;
     border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
 }
 
 button:hover {
-    background-color: #21618c;
+    background-color: var(--color-boton-hover);
 }
 
-input[type="text"], input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
+/* Estilos de formularios */
 form {
     display: flex;
     flex-direction: column;
 }
 
-@media screen and (max-width: 768px) {
-    .container {
-        padding: 10px;
-    }
+label {
+    font-weight: bold;
+    margin: 10px 0 5px;
 }
+
+input, select {
+    padding: 10px;
+    border: 1px solid var(--color-texto);
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Tabla para consultas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid var(--color-texto);
+    text-align: left;
+}
+
+th {
+    background-color: var(--color-principal);
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: var(--color-fondo);
+}
+
+.flashes {
+    list-style-type: none;
+    padding: 0;
+}
+
+.flashes li {
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #f0f8ff; /* Cambia el color según prefieras */
+    border: 1px solid #b0e0e6; /* Bordes suaves */
+    border-radius: 5px;
+}
+

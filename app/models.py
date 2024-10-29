@@ -1,4 +1,5 @@
-from . import db
+from app import db
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, DateTime, Boolean, Interval
 
 # Tabla vehiculos
 class Vehiculos(db.Model):
@@ -9,18 +10,20 @@ class Vehiculos(db.Model):
     marca = db.Column(db.String(20), nullable=False, index=True)
     modelo = db.Column(db.String(30), nullable=False, index=True)
     color = db.Column(db.String(15), nullable=False)
-    id_dueño = db.Column(db.Integer, db.ForeignKey('dueños.id_dueño'), nullable=False, index=True)
+    id_duenio = db.Column(db.Integer, db.ForeignKey('duenios.id_duenio'), nullable=False, index=True)
     tipo_vehiculo = db.Column(db.Enum('carro', 'moto', name='tipo_vehiculo_enum'), nullable=False)
     id_plaza = db.Column(db.Integer, db.ForeignKey('plazas.id_plaza'), nullable=True, unique=True)
+    activo = db.Column(Boolean, default=True)
 
-# Tabla dueños
-class Dueños(db.Model):
-    __tablename__ = 'dueños'
+# Tabla duenios
+class Duenios(db.Model):
+    __tablename__ = 'duenios'
 
-    id_dueño = db.Column(db.Integer, primary_key=True)
+    id_duenio = db.Column(db.Integer, primary_key=True)
     cedula = db.Column(db.Integer, nullable=False, unique=True)
     nombre = db.Column(db.String(30), nullable=False)
     telefono = db.Column(db.String(10), nullable=False, unique=True)
+    activo = db.Column(Boolean, default=True)
 
 # Tabla plazas
 class Plazas(db.Model):
@@ -53,8 +56,8 @@ class Facturas(db.Model):
     monto = db.Column(db.Integer, nullable=False)
     id_vehiculo = db.Column(db.Integer, db.ForeignKey('vehiculos.id_vehiculo'), nullable=False, index=True)
     placa = db.Column(db.String(6), nullable=False, index=True)
-    id_dueño = db.Column(db.Integer, db.ForeignKey('dueños.id_dueño'), nullable=False, index=False)
-    cedula_dueño = db.Column(db.Integer, nullable=False, index=True)
+    id_duenio = db.Column(db.Integer, db.ForeignKey('duenios.id_duenio'), nullable=False, index=False)
+    cedula_duenio = db.Column(db.Integer, nullable=False, index=True)
 
 # Tabla empleados
 class Empleados(db.Model):
@@ -63,9 +66,10 @@ class Empleados(db.Model):
     id_empleado = db.Column(db.Integer, primary_key=True)
     cedula = db.Column(db.Integer, nullable=False, unique=True)
     nombre = db.Column(db.String(30), nullable=False)
-    cargo = db.Column(db.String(20), nullable=False)
+    cargo = db.Column(db.Enum('admin', 'usuario', 'vigilante', 'aseador', name='cargo_enum'), nullable=False)
     telefono = db.Column(db.String(20), nullable=False, unique=True)
     salario = db.Column(db.Integer, nullable=False)
+    activo = db.Column(Boolean, default=True)
 
 # Tabla usuarios
 class Usuarios(db.Model):
@@ -73,4 +77,5 @@ class Usuarios(db.Model):
 
     id_usuario = db.Column(db.Integer, primary_key=True)
     id_empleado = db.Column(db.Integer, db.ForeignKey('empleados.id_empleado'), nullable=False, unique=True)
-    contraseña = db.Column(db.String(128), nullable=False)
+    contrasenia = db.Column(db.String(128), nullable=False)
+    activo = db.Column(Boolean, default=True)

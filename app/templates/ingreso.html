@@ -1,46 +1,18 @@
-<!-- ingreso.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/css/estilos_generales.css">
-    <link rel="stylesheet" href="../static/css/ingreso.css">
-    <title>Registrar Ingreso - ParqueaSmart</title>
+    <title>Registrar Ingreso</title>
 </head>
 <body>
     <div class="container">
-        <h2>Registrar Ingreso de Vehículo</h2>
-        <form action="/registrar_ingreso" method="post">
-            <h3>Información del Vehículo</h3>
-            <label for="placa">Placa del Vehículo:</label>
-            <input type="text" id="placa" name="placa" required>
-
-            <label for="marca">Marca:</label>
-            <input type="text" id="marca" name="marca" required>
-
-            <label for="modelo">Modelo:</label>
-            <input type="text" id="modelo" name="modelo" required>
-
-            <label for="color">Color:</label>
-            <input type="text" id="color" name="color" required>
-
-            <label for="tipo">Tipo de Vehículo:</label>
-            <select id="tipo" name="tipo" required>
-                <option value="carro">Carro</option>
-                <option value="moto">Moto</option>
-            </select>
-
-            <h3>Información del Dueño</h3>
-            <label for="cedula">Cédula del Dueño:</label>
-            <input type="text" id="cedula" name="cedula" required>
-
-            <label for="nombre">Nombre del Dueño:</label>
-            <input type="text" id="nombre" name="nombre" required>
-
-            <label for="telefono">Teléfono del Dueño:</label>
-            <input type="text" id="telefono" name="telefono" required>
-
+        <h1>Registrar Ingreso de Vehículo</h1>
+        <form action="/ingreso" method="POST">
+            <label for="placa">Placa</label>
+            <input type="text" id="placa" name="placa" required autocomplete="off"><br>
+            
             <button type="submit">Registrar Ingreso</button>
         </form>
     </div>

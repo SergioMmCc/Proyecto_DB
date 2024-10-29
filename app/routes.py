@@ -1,0 +1,480 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from datetime import datetime
+from app import db
+from app.models import Vehiculos, Duenios, Plazas, RegistroEstancias, Facturas, Empleados, Usuarios
+
+main = Blueprint('main', __name__)
+
+@main.route('/test_db')
+def test_db():
+    try:
+        result = db.session.execute('SELECT 1')
+        return "Conexión exitosa a la base de datos: {}".format(result.fetchall())
+    except Exception as e:
+        return f"Error en la conexión: {str(e)}"
+
+# Autenticación --------------------------------------------------------------------------------------------------------
+# Ruta para acceder al panel de administración o de usuario
+@main.route('/index', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        id_usuario = request.form['id_usuario']
+        contrasenia = request.form['contrasenia']
+
+        print(f"ID de Usuario: {id_usuario}, Contraseña: {contrasenia}")  # Log para depuración
+
+        # Buscar el usuario en la base de datos
+        usuario = Usuarios.query.filter_by(id_usuario=id_usuario, contrasenia=contrasenia).first()
+
+        if usuario and usuario.activo==True:
+            # Verificar el tipo de usuario
+            empleado = Empleados.query.get(usuario.id_empleado)
+
+            if empleado.cargo == 'admin':
+                session['usuario'] = 'admin'
+                return render_template('menu_admin.html')
+            else:
+                session['usuario'] = 'usuario'
+                return render_template('menu.html')
+            
+        else:
+            return "Usuario no encontrado.", 401
+    return render_template('index.html')
+
+# Registros -----------------------------------------------------------------------------------------------
+# Ruta para registrar un vehículo
+@main.route('/registrar_vehiculo', methods=['GET', 'POST'])
+def registrar_vehiculo(placa):
+    if request.method == 'POST':
+        marca = request.form['marca']
+        modelo = request.form['modelo']
+        color = request.form['color']
+        tipo_vehiculo = request.form['tipo_vehiculo']
+        cedula_duenio = request.form['cedula_duenio']
+        
+        # Buscar el duenio por cédula
+        duenio = Duenios.query.filter_by(cedula=cedula_duenio).first()
+        if not duenio:
+            registrar_duenio(cedula_duenio)
+            duenio = Duenios.query.filter_by(cedula=cedula_duenio).first()
+        if duenio.activo==False:
+            duenio.activo=True
+            db.session.commit()
+
+        vehiculo = Vehiculos(placa=placa, marca=marca, modelo=modelo, color=color, id_duenio=duenio.id_duenio, tipo_vehiculo=tipo_vehiculo, activo=True)
+        db.session.add(vehiculo)
+        db.session.commit()
+
+    return render_template('registrar_vehiculos.html')
+
+# Ruta para registrar un duenio
+@main.route('/registrar_duenio', methods=['GET', 'POST'])
+def registrar_duenio(cedula):
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        telefono = request.form['telefono']
+
+        duenio = Duenios(cedula=cedula, nombre=nombre, telefono=telefono, activo=True)
+        db.session.add(duenio)
+        db.session.commit()
+
+    return render_template('registrar_duenios.html')
+
+# Ruta para registrar el ingreso de un vehículo
+@main.route('/ingreso', methods=['GET', 'POST'])
+def ingreso():
+    if request.method == 'POST':
+        placa = request.form['placa']
+        # Buscar el vehículo por placa
+        vehiculo = Vehiculos.query.filter_by(placa=placa).first()
+        if not vehiculo:
+            registrar_vehiculo(placa)
+            vehiculo = Vehiculos.query.filter_by(placa=placa).first()
+        if vehiculo.activo==False:
+            vehiculo.activo=True
+            db.session.commit()
+
+        # Buscar una plaza disponible
+        if vehiculo.tipo_vehiculo == 'carro':
+            plaza = Plazas.query.filter_by(tipo_plaza='carro', estado='disponible', activo=True).first()
+        else:
+            plaza = Plazas.query.filter_by(tipo_plaza='moto', estado='disponible', activo=True).first()
+        if not plaza:
+            return "No hay plazas disponibles.", 404
+        
+        # Marcar la plaza como no disponible
+        plaza.estado = 'no disponible'
+
+        # Asignar la plaza al vehículo
+        vehiculo.id_plaza = plaza.id_plaza
+
+        # Crear un registro de estancia
+        estancia = RegistroEstancias(id_vehiculo=vehiculo.id_vehiculo, id_plaza=plaza.id_plaza, fecha_hora_entrada=datetime.now(), estado='en proceso')
+        db.session.add(estancia)
+
+        db.session.commit()
+        return redirect(url_for('main.vehiculos'))
+    
+    return render_template('ingreso.html')
+
+# Función para calcular el monto a pagar por la estancia
+def calcular_monto(tiempo_estancia):
+    # Calcular el monto a pagar por la estancia
+    monto = 0
+    if tiempo_estancia.days > 0:
+        monto += 20000 * tiempo_estancia.days
+    if tiempo_estancia.hours > 0:
+        monto += 2000 * tiempo_estancia.hours
+    if tiempo_estancia.minutes > 0 or tiempo_estancia.seconds > 0:
+        monto += 2000
+
+    return monto
+
+
+# Función para generar una factura
+def generar_factura(vehiculo, duenio):
+    # Buscar la estancia en proceso para el vehículo
+    estancia = RegistroEstancias.query.filter_by(id_vehiculo=vehiculo.id_vehiculo, estado='en proceso').first()
+
+    if estancia:
+        # Calcular el tiempo de estancia
+        tiempo_estancia = estancia.fecha_hora_salida - estancia.fecha_hora_entrada
+
+        # Calcular el monto a pagar
+        monto = calcular_monto(tiempo_estancia)
+
+        # Crear la factura
+        factura = Facturas(id_estancia=estancia.id_estancia, fecha_hora_entrada=estancia.fecha_hora_entrada,
+                           fecha_hora_salida=estancia.fecha_hora_salida, tiempo_estancia=tiempo_estancia, monto=monto,
+                           id_vehiculo=vehiculo.id_vehiculo, placa=vehiculo.placa, id_duenio=duenio.id_duenio,
+                           cedula_duenio=duenio.cedula)
+
+        # Guardar los cambios en la base de datos
+        db.session.add(factura)
+        db.session.commit()
+
+        return factura
+    else:
+        return None
+
+# Ruta para registrar la salida de un vehículo
+@main.route('/salida', methods=['GET', 'POST'])
+def salida():
+    if request.method == 'POST':
+        placa = request.form['placa']
+        cedula = request.form['cedula']
+
+        # Buscar el vehículo por placa
+        vehiculo = Vehiculos.query.filter_by(placa=placa).first()
+
+        if vehiculo:
+            # Obtener el duenio del vehículo
+            duenio = Duenios.query.get(vehiculo.id_duenio)
+
+            if duenio and duenio.cedula == cedula:  # Verificar que la cédula coincida
+                # Buscar la estancia en proceso para el vehículo
+                estancia = RegistroEstancias.query.filter_by(id_vehiculo=vehiculo.id_vehiculo, estado='en proceso').first()
+
+                if estancia:
+                    # Hora de salida
+                    estancia.fecha_hora_salida = datetime.now()
+
+                    # Generar la factura
+                    factura = generar_factura(vehiculo, duenio)
+
+                    # Actualizar estado de la estancia a 'finalizada'
+                    estancia.estado = 'finalizada'
+
+                    # Actualizar estado de la plaza a 'disponible'
+                    plaza = Plazas.query.get(estancia.id_plaza)
+                    if plaza:
+                        plaza.estado = 'disponible'
+
+                    # Actualizar id_plaza del vehículo a NULL
+                    vehiculo.id_plaza = None
+
+                    # Guardar los cambios en la base de datos
+                    db.session.commit()
+
+                    return redirect(url_for('main.vehiculos'))
+                else:
+                    return "No hay estancia en proceso para este vehículo.", 404
+            else:
+                return "La cédula no coincide con el duenio del vehículo.", 403
+        else:
+            return "Vehículo no encontrado.", 404
+
+    return render_template('salida.html')
+
+# Ruta para buscar empleados
+@main.route('/cedula_empleado', methods=['GET', 'POST'])
+def cedula_empleado():
+    if request.method == 'POST':
+        cedula = request.form['cedula']
+        empleado = Empleados.query.filter_by(cedula=cedula).first()
+
+        if empleado:
+            if not empleado.activo:
+                empleado.activo = True
+                usuario = Usuarios.query.filter_by(id_empleado=empleado.id_empleado).first()
+                if usuario:
+                    usuario.activo = True
+                db.session.commit()
+                flash("Empleado activado correctamente.")
+            else:
+                flash("El empleado ya está registrado.")
+        else:
+            # Redirigir al formulario de registro con la cédula
+            session['cedula'] = cedula
+            return redirect(url_for('main.registrar_empleado'))
+        return redirect(url_for('main.index'))
+
+    return render_template('cedula_empleado.html')
+
+# Ruta para agregar empleados
+@main.route('/registrar_empleado', methods=['GET', 'POST'])
+def registrar_empleado():
+    nueva_cedula = session.get('cedula')  # Obtener cédula de la URL, si existe
+    if request.method == 'POST':
+        if not nueva_cedula:  # Si no hay cédula, debes manejar el caso de error
+            flash("La cédula es requerida.")
+            return redirect(url_for('main.cedula_empleado'))
+
+        else:
+            nombre = request.form['nombre']
+            cargo = request.form['cargo']
+            telefono = request.form['telefono']
+            salario = request.form['salario']
+
+            empleado = Empleados(cedula=nueva_cedula, nombre=nombre, cargo=cargo, telefono=telefono, salario=salario, activo=True)
+            db.session.add(empleado)
+            db.session.commit()
+
+            if cargo in ['admin', 'usuario']:
+                session['id_empleado'] = empleado.id_empleado
+                return redirect(url_for('main.registrar_usuario'))
+            
+            flash("Empleado registrado correctamente.")
+            return render_template('menu_admin.html')
+
+    return render_template('registrar_empleado.html')
+
+# Ruta para registrar un usuario
+@main.route('/registrar_usuario', methods=['GET', 'POST'])
+def registrar_usuario():
+    id_empleado = session.get('id_empleado')  # Obtener id_empleado de la URL, si existe
+    if request.method == 'POST':
+        id_usuario = request.form['id_usuario']
+        contrasenia = request.form['contrasenia']
+
+        usuario = Usuarios(id_usuario=id_usuario, contrasenia=contrasenia, id_empleado=id_empleado)
+        db.session.add(usuario)
+        db.session.commit()
+
+        flash("Empleado registrado correctamente.")
+        return render_template('menu_admin.html')
+
+    return render_template('registrar_usuario.html')
+
+# Ruta para registrar una plaza
+@main.route('/agregar_plaza', methods=['GET', 'POST'])
+def agregar_plaza():
+    if request.method == 'POST':
+        tipo_plaza = request.form['tipo_plaza']
+        estado = request.form['estado']
+
+        plaza = Plazas(tipo_plaza=tipo_plaza, estado=estado)
+        db.session.add(plaza)
+        db.session.commit()
+
+    return render_template('agregar_plaza.html')
+
+# # Actualizaciones ------------------------------------------------------------------------------------------------------
+# # Ruta para actualizar los datos de un vehículo
+# @main.route('/vehiculos/<int:id_vehiculo>/editar', methods=['GET', 'POST'])
+# def actualizar_vehiculo(id_vehiculo):
+#     vehiculo = Vehiculos.query.get(id_vehiculo)
+
+#     if request.method == 'POST':
+#         placa = request.form['placa']
+#         marca = request.form['marca']
+#         modelo = request.form['modelo']
+#         color = request.form['color']
+#         cedula_duenio = request.form['cedula_duenio']
+        
+#         # Buscar el duenio por cédula
+#         duenio = Duenios.query.filter_by(cedula=cedula_duenio).first()
+#         if not duenio:
+#             nombre = request.form['nombre']
+#             telefono = request.form['telefono']
+#             duenio = Duenios(cedula=cedula_duenio, nombre=nombre, telefono=telefono)
+#             db.session.add(duenio)
+
+#         tipo_vehiculo = request.form['tipo_vehiculo']
+
+#         vehiculo.placa = placa
+#         vehiculo.marca = marca
+#         vehiculo.modelo = modelo
+#         vehiculo.color = color
+#         vehiculo.id_duenio = duenio.id_duenio
+#         vehiculo.tipo_vehiculo = tipo_vehiculo
+
+#         db.session.commit()
+#         return redirect(url_for('vehiculos'))
+
+#     return render_template('editar_vehiculo.html', vehiculo=vehiculo)
+
+# # Ruta para actualizar los datos de un duenio
+# @main.route('/duenios/<int:id_duenio>/editar', methods=['GET', 'POST'])
+# def actualizar_duenio(id_duenio):
+#     duenio = Duenios.query.get(id_duenio)
+
+#     if request.method == 'POST':
+#         cedula = request.form['cedula']
+#         nombre = request.form['nombre']
+#         telefono = request.form['telefono']
+
+#         duenio.cedula = cedula
+#         duenio.nombre = nombre
+#         duenio.telefono = telefono
+
+#         db.session.commit()
+#         return redirect(url_for('duenios'))
+
+#     return render_template('editar_duenio.html', duenio=duenio)
+
+# # Ruta para actualizar los datos de un empleado
+# @main.route('/empleados/<int:id_empleado>/editar', methods=['GET', 'POST'])
+# def actualizar_empleado(id_empleado):
+#     empleado = Empleados.query.get(id_empleado)
+
+#     if request.method == 'POST':
+#         cedula = request.form['cedula']
+#         nombre = request.form['nombre']
+#         cargo = request.form['cargo']
+#         telefono = request.form['telefono']
+#         salario = request.form['salario']
+
+#         if (empleado.cargo == 'admin' or empleado.cargo == 'usuario') and cargo != 'admin' and cargo != 'usuario':
+#             usuario = Usuarios.query.filter_by(id_empleado=empleado.id_empleado).first()
+#             db.session.delete(usuario)
+
+#         if (cargo == 'admin' or cargo == 'usuario') and empleado.cargo != 'admin' and empleado.cargo != 'usuario':
+#             id_usuario = request.form['id_usuario']
+#             contrasenia = request.form['contrasenia']
+            
+#             usuario = Usuarios(id_usuario=id_usuario, id_empleado=empleado.id_empleado, contrasenia=contrasenia)
+#             db.session.add(usuario)
+
+#         empleado.cedula = cedula
+#         empleado.nombre = nombre
+#         empleado.cargo = cargo
+#         empleado.telefono = telefono
+#         empleado.salario = salario
+
+#         db.session.commit()
+#         return redirect(url_for('empleados'))
+
+#     return render_template('editar_empleado.html', empleado=empleado)
+
+# Ruta para actualizar las credenciales de un usuario
+@main.route('/usuarios/<int:id_usuario>/editar', methods=['GET', 'POST'])
+def actualizar_usuario(id_usuario):
+    usuario = Usuarios.query.get(id_usuario)
+
+    if request.method == 'POST':
+        id_usuario = request.form['id_usuario']
+        contrasenia = request.form['contrasenia']
+
+        # Actualizar los datos del usuario
+        usuario.id_usuario = id_usuario
+        usuario.contrasenia = contrasenia
+
+        db.session.commit()
+        return redirect(url_for('empleados'))
+
+    return render_template('registrar_usuario.html', usuario=usuario)
+
+# Consultas ------------------------------------------------------------------------------------------------------------
+# Ruta para mostrar los vehículos registrados
+@main.route('/consultar_todos_vehiculos', methods=['GET', 'POST'])
+def mostrar_vehiculos():
+    vehiculos = Vehiculos.query.all()
+    return render_template('consultar_todos_vehiculos.html', vehiculos=vehiculos)
+
+# Ruta para mostrar un vehículo en particular
+@main.route('/consultar_un_vehiculo', methods=['GET', 'POST'])
+def mostrar_vehiculo(id_vehiculo):
+    vehiculo = Vehiculos.query.get(id_vehiculo)
+    return render_template('consultar_un_vehiculo.html', vehiculo=vehiculo)
+
+# Ruta para consultar las facturas
+@main.route('/consultar_todas_facturas', methods=['GET', 'POST'])
+def mostrar_facturas():
+    facturas = Facturas.query.all()
+    return render_template('consultar_todas_facturas.html', facturas=facturas)
+
+# Ruta para mostrar una factura en particular
+@main.route('/consultar_una_factura', methods=['GET', 'POST'])
+def mostrar_factura(id_factura):
+    factura = Facturas.query.get(id_factura)
+    return render_template('consultar_una_factura.html', factura=factura)
+            
+# Ruta para mostrar los duenios registrados
+@main.route('/consultar_todos_duenios', methods=['GET', 'POST'])
+def mostrar_duenios():
+    duenios = Duenios.query.all()
+    return render_template('consultar_todos_duenios.html', duenios=duenios)
+
+# Ruta para mostrar un duenio en particular
+@main.route('/conultar_un_duenio', methods=['GET', 'POST'])
+def mostrar_duenio(id_duenio):
+    duenio = Duenios.query.get(id_duenio)
+    return render_template('consultar_un_duenio.html', duenio=duenio)
+
+# Ruta para mostrar los empleados registrados
+@main.route('/consultar_todos_empleados', methods=['GET', 'POST'])
+def mostrar_empleados():
+    empleados = Empleados.query.all()
+    return render_template('consultar_todos_empleados.html', empleados=empleados)
+
+# Ruta para mostrar un empleado en particular
+@main.route('/consultar_un_empleado', methods=['GET', 'POST'])
+def mostrar_empleado(id_empleado):
+    empleado = Empleados.query.get(id_empleado)
+    return render_template('consular_un_empleado.html', empleado=empleado)
+
+# Ruta para mostrar el estado de las plazas
+@main.route('/consultar_plazas', methods=['GET', 'POST'])
+def mostrar_plazas():
+    plazas = Plazas.query.all()
+    return render_template('mostrar_plazas.html', plazas=plazas)
+
+# Eliminaciones --------------------------------------------------------------------------------------------------------
+# Ruta para eliminar un vehículo
+@main.route('/eliminar_vehiculo', methods=['POST'])
+def eliminar_vehiculo(id_vehiculo):
+    vehiculo = Vehiculos.query.get(id_vehiculo)
+    vehiculo.activo=False
+    db.session.commit()
+    return redirect(url_for('mostrar_vehiculos'))
+
+# Ruta para eliminar un duenio
+@main.route('/eliminar_duenio', methods=['POST'])
+def eliminar_duenio(id_duenio):
+    duenio = Duenios.query.get(id_duenio)
+    duenio.activo=False
+    db.session.commit()
+    return redirect(url_for('mostrar_duenios'))
+
+# Ruta para eliminar un empleado
+@main.route('/eliminar_empleado', methods=['POST'])
+def eliminar_empleado(id_empleado):
+    empleado = Empleados.query.get(id_empleado)
+    # Verificar si em empleado tambien era usuario
+    usuario = Usuarios.query.filter_by(id_empleado=id_empleado).first()
+    if usuario:
+        usuario.activo=False
+    empleado.activo=False
+    db.session.commit()
+    return redirect(url_for('mostrar_empleados'))
