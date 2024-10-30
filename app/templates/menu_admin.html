@@ -36,10 +36,10 @@
             <div class="opciones">
                 <h2>Actualizar</h2>
                 <div class="botones">
-                    <button onclick="location.href='/registrar_vehiculo'">Actualizar Vehículo</button>
-                    <button onclick="location.href='/registrar_duenio'">Actualizar Dueño</button><br>
-                    <button onclick="location.href='/cedula_empleado'">Actualizar Empleado</button>
-                    <button onclick="location.href='/registrar_usuario'">Cambiar Credenciales de Usuario</button>
+                    <button onclick="window.location.href='{{ url_for('main.solicitar_placa_actualizar') }}'">Actualizar Vehículo</button>
+                    <button onclick="window.location.href='{{ url_for('main.solicitar_cedula_actualizar') }}'">Actualizar Dueño</button><br>
+                    <button onclick="window.location.href='{{ url_for('main.solicitar_cedula_empleado_actualizar') }}'">Actualizar Empleado</button>
+                    <button onclick="window.location.href='{{ url_for('main.solicitar_id_usuario_actualizar') }}'">Actualizar Usuario</button><br>
                 </div>
             </div>
             <div class="opciones">

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/estilos_generales.css">
+    <title>Actualizar Empleado</title>
+</head>
+<body>
+    <div class="container">
+
+        <h1>Actualizar Empleado</h1>
+        <form action="/actualizar_empleado" method="POST">
+            <input type="hidden" name="cedula" value="{{ cedula }}">
+
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" required autocomplete="off">
+
+            <label for="telefono">Telefono</label>
+            <input type="text" id="telefono" name="telefono" required autocomplete="off">
+            
+            <label for="salario">Salario</label>
+            <input type="text" id="salario" name="salario" required autocomplete="off">
+            
+            <label for="cargo">Cargo</label>
+            <select id="cargo" name="cargo" required>
+                <option value="vigilante">Vigilante</option>
+                <option value="aseador">Aseador</option>
+                <option value="admin">Administrador</option>
+                <option value="usuario">Usuario</option>
+            </select><br>
+            
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/estilos_generales.css">
+    <title>Actualizar Duenio</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Actualizar Dueño</h1>
+        <form action="/actualizar_duenio" method="POST">
+            
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" required autocomplete="off">
+            
+            <label for="telefono">Telefono</label>
+            <input type="text" id="telefono" name="telefono" required autocomplete="off"><br>
+            
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+</body>
+</html>
