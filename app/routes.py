@@ -495,7 +495,7 @@ def consultar_todos_duenios():
     duenios = Duenios.query.all()
     return render_template('consultar_todos_duenios.html', duenios=duenios)
 
-# Ruta para solicitar una cedula
+# Ruta para solicitar una cedula de un dueño
 @main.route('/solicitar_cedula_duenio', methods=['GET', 'POST'])
 def solicitar_cedula_duenio():
     if request.method == 'POST':
@@ -511,11 +511,39 @@ def solicitar_cedula_duenio():
     return render_template('solicitar_cedula_duenio.html')
 
 # Ruta para mostrar un duenio en particular
-@main.route('/conultar_un_duenio', methods=['GET'])
+@main.route('/consultar_un_duenio', methods=['GET'])
 def consultar_un_duenio():
     cedula = session.get('cedula')
     duenio = Duenios.query.filter_by(cedula=cedula).first()
     return render_template('consultar_un_duenio.html', duenio=duenio)
+
+# Ruta para mostrar los empleados registrados
+@main.route('/consultar_todos_empleados', methods=['GET'])
+def consultar_todos_empleados():
+    empleados = Empleados.query.all()
+    return render_template('consultar_todos_empleados.html', empleados=empleados)
+
+# Ruta para solicitar una cedula de un empleado
+@main.route('/solicitar_cedula_empleado', methods=['GET', 'POST'])
+def solicitar_cedula_empleado():
+    if request.method == 'POST':
+        cedula = request.form['cedula']
+
+        empleado = Empleados.query.filter_by(cedula=cedula).first()
+        if not empleado:
+            return "El empleado no esta registrado.", 404
+
+        session['cedula'] = cedula
+        return redirect(url_for('main.consultar_un_empleado'))
+
+    return render_template('solicitar_cedula_empleado.html')
+
+# Ruta para mostrar un duenio en particular
+@main.route('/consultar_un_empleado', methods=['GET'])
+def consultar_un_empleado():
+    cedula = session.get('cedula')
+    empleado = Empleados.query.filter_by(cedula=cedula).first()
+    return render_template('consultar_un_empleado.html', empleado=empleado)
 
 # Ruta para consultar las facturas
 @main.route('/consultar_todas_facturas', methods=['GET', 'POST'])
@@ -528,18 +556,6 @@ def mostrar_facturas():
 def mostrar_factura(id_factura):
     factura = Facturas.query.get(id_factura)
     return render_template('consultar_una_factura.html', factura=factura)
-
-# Ruta para mostrar los empleados registrados
-@main.route('/consultar_todos_empleados', methods=['GET', 'POST'])
-def mostrar_empleados():
-    empleados = Empleados.query.all()
-    return render_template('consultar_todos_empleados.html', empleados=empleados)
-
-# Ruta para mostrar un empleado en particular
-@main.route('/consultar_un_empleado', methods=['GET', 'POST'])
-def mostrar_empleado(id_empleado):
-    empleado = Empleados.query.get(id_empleado)
-    return render_template('consular_un_empleado.html', empleado=empleado)
 
 # Ruta para mostrar el estado de las plazas
 @main.route('/consultar_plazas', methods=['GET'])
