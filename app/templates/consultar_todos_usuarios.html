@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/tablas.css">
+    <title>Lista de Usuarios</title>
+</head>
+<body>
+    <h1>Lista de Usuarios</h1>
+
+    {% if usuarios %}
+        <table border="1">
+            <tr>
+                <th>ID Usuario</th>
+                <th>Nombre</th>
+                <th>Cedula</th>
+                <th>Tipo de Usuario</th>
+                <th>Contraseña</th>
+            </tr>
+            {% for usuario in usuarios %}
+                <tr>
+                    <td>{{ usuario.id_usuario }}</td>
+                    <td>{{ usuario.empleado.cedula }}</td>
+                    <td>{{ usuario.empleado.nombre }}</td>
+                    <td>{{ usuario.empleado.cargo }}</td>
+                    <td>{{ usuario.contrasenia }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No hay usuarios registrados.</p>
+    {% endif %}
+</body>
+</html>

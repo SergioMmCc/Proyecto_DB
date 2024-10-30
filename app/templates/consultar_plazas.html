@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/tablas.css">
+    <title>Lista de Plazas</title>
+</head>
+<body>
+    <h1>Lista de Plazas</h1>
+
+    {% if plazas %}
+        <table border="1">
+            <tr>
+                <th>Número</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+            </tr>
+            {% for plaza in plazas %}
+                <tr>
+                    <td>{{ plaza.id_plaza }}</td>
+                    <td>{{ plaza.tipo }}</td>
+                    <td>{{ plaza.estado }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No hay plazas registradas.</p>
+    {% endif %}
+</body>
+</html>

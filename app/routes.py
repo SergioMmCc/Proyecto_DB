@@ -461,6 +461,8 @@ def actualizar_usuario(id_usuario):
     return render_template('registrar_usuario.html', usuario=usuario)
 
 # Consultas ------------------------------------------------------------------------------------------------------------
+
+# Vehículos ------------------------------------------------------------------------------------------------------------
 # Ruta para mostrar los vehículos registrados
 @main.route('/consultar_todos_vehiculos', methods=['GET'])
 def consultar_todos_vehiculos():
@@ -489,6 +491,7 @@ def consultar_un_vehiculo():
     vehiculo = Vehiculos.query.filter_by(placa=placa).first()
     return render_template('consultar_un_vehiculo.html', vehiculo=vehiculo)
 
+# Dueños ---------------------------------------------------------------------------------------------------------------
 # Ruta para mostrar los duenios registrados
 @main.route('/consultar_todos_duenios', methods=['GET'])
 def consultar_todos_duenios():
@@ -517,6 +520,7 @@ def consultar_un_duenio():
     duenio = Duenios.query.filter_by(cedula=cedula).first()
     return render_template('consultar_un_duenio.html', duenio=duenio)
 
+# Empleados ------------------------------------------------------------------------------------------------------------
 # Ruta para mostrar los empleados registrados
 @main.route('/consultar_todos_empleados', methods=['GET'])
 def consultar_todos_empleados():
@@ -538,24 +542,33 @@ def solicitar_cedula_empleado():
 
     return render_template('solicitar_cedula_empleado.html')
 
-# Ruta para mostrar un duenio en particular
+# Ruta para mostrar un empleado en particular
 @main.route('/consultar_un_empleado', methods=['GET'])
 def consultar_un_empleado():
     cedula = session.get('cedula')
     empleado = Empleados.query.filter_by(cedula=cedula).first()
     return render_template('consultar_un_empleado.html', empleado=empleado)
 
+# Usuarios -------------------------------------------------------------------------------------------------------------
+# Ruta para mostrar los usuarios registrados
+@main.route('/consultar_todos_usuarios', methods=['GET'])
+def consultar_todos_usuarios():
+    usuarios = Usuarios.query.all()
+    return render_template('consultar_todos_usuarios.html', usuarios=usuarios)
+
+# Estancias ------------------------------------------------------------------------------------------------------------
 # Ruta para consultar las estancias
 @main.route('/consultar_estancias', methods=['GET'])
 def consultar_estancias():
     estancias = RegistroEstancias.query.all()
     return render_template('consultar_estancias.html', estancias=estancias)
 
+# Plazas ---------------------------------------------------------------------------------------------------------------
 # Ruta para mostrar el estado de las plazas
 @main.route('/consultar_plazas', methods=['GET'])
-def mostrar_plazas():
+def consultar_plazas():
     plazas = Plazas.query.all()
-    return render_template('mostrar_plazas.html', plazas=plazas)
+    return render_template('consultar_plazas.html', plazas=plazas)
 
 # Eliminaciones --------------------------------------------------------------------------------------------------------
 # Ruta para eliminar un vehículo

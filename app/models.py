@@ -77,3 +77,6 @@ class Usuarios(db.Model):
     id_empleado = db.Column(db.Integer, db.ForeignKey('empleados.id_empleado'), nullable=False, unique=True)
     contrasenia = db.Column(db.String(128), nullable=False)
     activo = db.Column(Boolean, default=True)
+
+    # Relaciones con otros modelos
+    empleado = db.relationship('Empleados', backref='usuarios')
