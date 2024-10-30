@@ -44,6 +44,9 @@ class RegistroEstancias(db.Model):
     fecha_hora_salida = db.Column(db.DateTime, nullable=True)
     estado = db.Column(db.Enum('en proceso', 'finalizada', name='estado_enum'), nullable=False)
 
+    # Relaciones con otros modelos
+    vehiculo = db.relationship('Vehiculos', backref='estancias')
+
 # Tabla facturas
 class Facturas(db.Model):
     __tablename__ = 'facturas'

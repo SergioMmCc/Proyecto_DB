@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/tablas.css">
+    <title>Lista de Estancias</title>
+</head>
+<body>
+    <h1>Lista de Estancias</h1>
+
+    {% if estancias %}
+        <table border="1">
+            <tr>
+                <th>ID</th>
+                <th>Placa Vehíulo</th>
+                <th>Plaza</th>
+                <th>Fecha y Hora de Entrada</th>
+                <th>Fecha y Hora de Salida</th>
+                <th>Estado</th>
+            </tr>
+            {% for estancia in estancias %}
+                <tr>
+                    <td>{{ estancia.id_estancia }}</td>
+                    <td>{{ estancia.vehiculo.placa }}</td>
+                    <td>{{ estancia.id_plaza }}</td>
+                    <td>{{ estancia.fecha_hora_entrada }}</td>
+                    <td>{{ estancia.fecha_hora_salida }}</td>
+                    <td>{{ estancia.estado }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No hay estancias registradas.</p>
+    {% endif %}
+</body>
+</html>

@@ -545,17 +545,11 @@ def consultar_un_empleado():
     empleado = Empleados.query.filter_by(cedula=cedula).first()
     return render_template('consultar_un_empleado.html', empleado=empleado)
 
-# Ruta para consultar las facturas
-@main.route('/consultar_todas_facturas', methods=['GET', 'POST'])
-def mostrar_facturas():
-    facturas = Facturas.query.all()
-    return render_template('consultar_todas_facturas.html', facturas=facturas)
-
-# Ruta para mostrar una factura en particular
-@main.route('/consultar_una_factura', methods=['GET', 'POST'])
-def mostrar_factura(id_factura):
-    factura = Facturas.query.get(id_factura)
-    return render_template('consultar_una_factura.html', factura=factura)
+# Ruta para consultar las estancias
+@main.route('/consultar_estancias', methods=['GET'])
+def consultar_estancias():
+    estancias = RegistroEstancias.query.all()
+    return render_template('consultar_estancias.html', estancias=estancias)
 
 # Ruta para mostrar el estado de las plazas
 @main.route('/consultar_plazas', methods=['GET'])
