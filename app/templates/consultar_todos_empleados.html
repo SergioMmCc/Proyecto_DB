@@ -35,5 +35,11 @@
     {% else %}
         <p>No hay empleados registrados.</p>
     {% endif %}
+
+    {% if tipo_usuario == 'admin' %}
+        <button onclick="location.href='{{ url_for('main.menu_admin') }}'">Regresar al Menú</button>
+    {% else %}
+        <button onclick="location.href='{{ url_for('main.menu') }}'">Regresar al Menú</button>
+    {% endif %}
 </body>
 </html>

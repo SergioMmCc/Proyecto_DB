@@ -13,6 +13,15 @@ def test_db():
     except Exception as e:
         return f"Error en la conexión: {str(e)}"
 
+# Rutas de la aplicación ----------------------------------------------------------------------------------------------   
+@main.route('/menu_admin')
+def menu_admin():
+    return render_template('menu_admin.html')
+
+@main.route('/menu')
+def menu():
+    return render_template('menu.html')
+
 # Autenticación --------------------------------------------------------------------------------------------------------
 # Ruta para acceder al panel de administración o de usuario
 @main.route('/index', methods=['GET', 'POST'])
