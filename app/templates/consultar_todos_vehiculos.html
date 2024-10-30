@@ -19,6 +19,7 @@
                 <th>Color</th>
                 <th>Tipo</th>
                 <th>ID Dueño</th>
+                <th>Plaza</th>
                 <th>Activo</th>
             </tr>
             {% for vehiculo in vehiculos %}
@@ -30,6 +31,7 @@
                     <td>{{ vehiculo.color }}</td>
                     <td>{{ vehiculo.tipo }}</td>
                     <td>{{ vehiculo.id_duenio }}</td>
+                    <td>{{ vehiculo.id_plaza }}</td>
                     <td>{{ vehiculo.activo }}</td>
                 </tr>
             {% endfor %}
