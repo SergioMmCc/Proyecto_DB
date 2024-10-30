@@ -288,7 +288,7 @@ def cedula_empleado():
             # Redirigir al formulario de registro con la cédula
             session['cedula'] = cedula
             return redirect(url_for('main.registrar_empleado'))
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.menu_admin'))
 
     return render_template('cedula_empleado.html')
 
@@ -462,16 +462,60 @@ def actualizar_usuario(id_usuario):
 
 # Consultas ------------------------------------------------------------------------------------------------------------
 # Ruta para mostrar los vehículos registrados
-@main.route('/consultar_todos_vehiculos', methods=['GET', 'POST'])
-def mostrar_vehiculos():
+@main.route('/consultar_todos_vehiculos', methods=['GET'])
+def consultar_todos_vehiculos():
     vehiculos = Vehiculos.query.all()
     return render_template('consultar_todos_vehiculos.html', vehiculos=vehiculos)
 
+# Ruta para solicitar una placa
+@main.route('/solicitar_placa', methods=['GET', 'POST'])
+def solicitar_placa():
+    if request.method == 'POST':
+        placa = request.form['placa']
+
+        vehiculo = Vehiculos.query.filter_by(placa=placa).first()
+        if not vehiculo:
+            return "El vehiculo no esta registrado.", 404
+
+        session['placa'] = placa
+        return redirect(url_for('main.consultar_un_vehiculo'))
+
+    return render_template('solicitar_placa.html')
+
 # Ruta para mostrar un vehículo en particular
-@main.route('/consultar_un_vehiculo', methods=['GET', 'POST'])
-def mostrar_vehiculo(id_vehiculo):
-    vehiculo = Vehiculos.query.get(id_vehiculo)
+@main.route('/consultar_un_vehiculo', methods=['GET'])
+def consultar_un_vehiculo():
+    placa = session.get('placa')
+    vehiculo = Vehiculos.query.filter_by(placa=placa).first()
     return render_template('consultar_un_vehiculo.html', vehiculo=vehiculo)
+
+# Ruta para mostrar los duenios registrados
+@main.route('/consultar_todos_duenios', methods=['GET'])
+def consultar_todos_duenios():
+    duenios = Duenios.query.all()
+    return render_template('consultar_todos_duenios.html', duenios=duenios)
+
+# Ruta para solicitar una cedula
+@main.route('/solicitar_cedula_duenio', methods=['GET', 'POST'])
+def solicitar_cedula_duenio():
+    if request.method == 'POST':
+        cedula = request.form['cedula']
+
+        duenio = Duenios.query.filter_by(cedula=cedula).first()
+        if not duenio:
+            return "El dueño no esta registrado.", 404
+
+        session['cedula'] = cedula
+        return redirect(url_for('main.consultar_un_duenio'))
+
+    return render_template('solicitar_cedula_duenio.html')
+
+# Ruta para mostrar un duenio en particular
+@main.route('/conultar_un_duenio', methods=['GET'])
+def consultar_un_duenio():
+    cedula = session.get('cedula')
+    duenio = Duenios.query.filter_by(cedula=cedula).first()
+    return render_template('consultar_un_duenio.html', duenio=duenio)
 
 # Ruta para consultar las facturas
 @main.route('/consultar_todas_facturas', methods=['GET', 'POST'])
@@ -484,18 +528,6 @@ def mostrar_facturas():
 def mostrar_factura(id_factura):
     factura = Facturas.query.get(id_factura)
     return render_template('consultar_una_factura.html', factura=factura)
-            
-# Ruta para mostrar los duenios registrados
-@main.route('/consultar_todos_duenios', methods=['GET', 'POST'])
-def mostrar_duenios():
-    duenios = Duenios.query.all()
-    return render_template('consultar_todos_duenios.html', duenios=duenios)
-
-# Ruta para mostrar un duenio en particular
-@main.route('/conultar_un_duenio', methods=['GET', 'POST'])
-def mostrar_duenio(id_duenio):
-    duenio = Duenios.query.get(id_duenio)
-    return render_template('consultar_un_duenio.html', duenio=duenio)
 
 # Ruta para mostrar los empleados registrados
 @main.route('/consultar_todos_empleados', methods=['GET', 'POST'])
@@ -510,7 +542,7 @@ def mostrar_empleado(id_empleado):
     return render_template('consular_un_empleado.html', empleado=empleado)
 
 # Ruta para mostrar el estado de las plazas
-@main.route('/consultar_plazas', methods=['GET', 'POST'])
+@main.route('/consultar_plazas', methods=['GET'])
 def mostrar_plazas():
     plazas = Plazas.query.all()
     return render_template('mostrar_plazas.html', plazas=plazas)
@@ -531,28 +563,39 @@ def eliminar_vehiculo():
     
         vehiculo.activo=False
         db.session.commit()
+
+        # Revisar si el dueño tiene más vehículos registrados
+        vehiculo_duenio = Vehiculos.query.filter_by(id_duenio=vehiculo.id_duenio, activo=True).first()
+        if not vehiculo_duenio:
+            duenio = Duenios.query.get(vehiculo.id_duenio)
+            duenio.activo=False
+            db.session.commit()
+
         if session.get('usuario') == 'admin':
             return render_template('menu_admin.html')
         else:
             return render_template('menu.html')
     return render_template('eliminar_vehiculo.html')
 
-# Ruta para eliminar un duenio
-@main.route('/eliminar_duenio', methods=['POST'])
-def eliminar_duenio(id_duenio):
-    duenio = Duenios.query.get(id_duenio)
-    duenio.activo=False
-    db.session.commit()
-    return redirect(url_for('mostrar_duenios'))
-
 # Ruta para eliminar un empleado
-@main.route('/eliminar_empleado', methods=['POST'])
-def eliminar_empleado(id_empleado):
-    empleado = Empleados.query.get(id_empleado)
-    # Verificar si em empleado tambien era usuario
-    usuario = Usuarios.query.filter_by(id_empleado=id_empleado).first()
-    if usuario:
-        usuario.activo=False
-    empleado.activo=False
-    db.session.commit()
-    return redirect(url_for('mostrar_empleados'))
+@main.route('/eliminar_empleado', methods=['GET', 'POST'])
+def eliminar_empleado():
+    if request.method == 'POST':
+        cedula = request.form['cedula']
+
+        # Buscar el empleado por cedula
+        empleado = Empleados.query.filter_by(cedula=cedula).first()
+        if not empleado or empleado.activo==False:
+            return "El empleado no fue encontrado.", 404
+        
+        empleado.activo=False
+
+        # Revisar si el empleado es usuario
+        usuario = Usuarios.query.filter_by(id_empleado=empleado.id_empleado).first()
+        if usuario:
+            usuario.activo=False
+        db.session.commit()
+
+        return render_template('menu_admin.html')
+    
+    return render_template('eliminar_empleado.html')

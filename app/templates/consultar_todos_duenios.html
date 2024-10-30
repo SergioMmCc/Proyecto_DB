@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/tablas.css">
+    <title>Lista de Dueños</title>
+</head>
+<body>
+    <h1>Lista de Dueños</h1>
+
+    {% if duenios %}
+        <table border="1">
+            <tr>
+                <th>ID</th>
+                <th>Cedula</th>
+                <th>Nombre</th>
+                <th>Telefono</th>
+                <th>Activo</th>
+            </tr>
+            {% for duenio in duenios %}
+                <tr>
+                    <td>{{ duenio.id_duenio }}</td>
+                    <td>{{ duenio.cedula }}</td>
+                    <td>{{ duenio.nombre }}</td>
+                    <td>{{ duenio.telefono }}</td>
+                    <td>{{ duenio.activo }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No hay dueños registrados.</p>
+    {% endif %}
+</body>
+</html>

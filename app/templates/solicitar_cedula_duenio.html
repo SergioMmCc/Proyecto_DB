@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eliminar Empleado</title>
     <link rel="stylesheet" href="../static/css/estilos_generales.css">
+    <title>Consultar Dueño</title>
 </head>
 <body>
     <div class="container">
-        <h1>Eliminar Empleado</h1>
-        <form action="/eliminar_empleado" method="post">
-            <label for="cedula">Ingrese la cedula:</label>
+        <h1>Consultar Dueño</h1>
+        <form action="/solicitar_cedula_duenio" method="POST">
+            <label for="placa">Cedula</label>
             <input type="text" id="cedula" name="cedula" required autocomplete="off"><br>
-            <button type="submit">Eliminar</button>
+            <button type="submit">Consultar</button>
         </form>
     </div>
-    <!-- <footer>
-        <p>&copy; 2023 Proyecto DB</p>
-    </footer> -->
 </body>
 </html>

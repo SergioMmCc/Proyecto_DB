@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalles del Vehículo</title>
+    <link rel="stylesheet" href="../static/css/tablas.css">
+</head>
+<body>
+
+    <h1>Información del Vehículo</h1>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <td>{{ vehiculo.id_vehiculo }}</td>
+        </tr>
+        <tr>
+            <th>Placa</th>
+            <td>{{ vehiculo.placa }}</td>
+        </tr>
+        <tr>
+            <th>Marca</th>
+            <td>{{ vehiculo.marca }}</td>
+        </tr>
+        <tr>
+            <th>Modelo</th>
+            <td>{{ vehiculo.modelo }}</td>
+        </tr>
+        <tr>
+            <th>Color</th>
+            <td>{{ vehiculo.color }}</td>
+        </tr>
+        <tr>
+            <th>Tipo</th>
+            <td>{{ vehiculo.tipo }}</td>
+        </tr>
+
+        <tr>
+            <th>ID Dueño</th>
+            <td>{{ vehiculo.id_duenio }}</td>
+        </tr>
+
+        <tr>
+            <th>Activo</th>
+            <td>{{ vehiculo.activo }}</td>
+        </tr>
+    </table>
+
+</body>
+</html>

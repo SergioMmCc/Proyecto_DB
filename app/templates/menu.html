@@ -21,10 +21,10 @@
             <div class="opciones">
                 <h2>Consultar</h2>
                 <div class="botones">
-                    <button onclick="location.href='/consultar_todos_vehiculos'">Consultar Vehículos</button>
-                    <button onclick="location.href='/solicitar_placa'">Consultar un Vehículo</button><br>
-                    <button onclick="location.href='/consultar_todos_duenios'">Consultar Dueños</button>
-                    <button onclick="location.href='/solicitar_cedula'">Consultar un Dueño</button><br>
+                    <button onclick="window.location.href='{{ url_for('main.consultar_todos_vehiculos') }}'">Consultar Vehículos</button>
+                    <button onclick="window.location.href='{{ url_for('main.solicitar_placa') }}'">Consultar un Vehículo</button>
+                    <button onclick="window.location.href='{{ url_for('main.consultar_todos_duenios') }}'">Consultar Dueños</button>
+                    <button onclick="window.location.href='{{ url_for('main.solicitar_cedula_duenio') }}'">Consultar un Dueño</button><br>
                     <button onclick="location.href='/consultar_todas_facturas'">Consultar Facturas</button>
                     <button onclick="location.href='/solicitar_placa'">Consultar una Factura</button><br>
                     <button onclick="location.href='/consultar_plazas'">Consultar Plazas</button>
@@ -41,8 +41,6 @@
                 <h2>Eliminar</h2>
                 <div class="botones">
                     <button onclick="window.location.href='{{ url_for('main.eliminar_vehiculo') }}'">Eliminar Vehiculo</button>
-                    <button onclick="location.href='/eliminar_duenio'">Eliminar Dueño</button>
-                </div>
             </div>
         </div>
     </div>

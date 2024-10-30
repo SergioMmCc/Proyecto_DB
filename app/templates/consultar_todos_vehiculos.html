@@ -3,34 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/css/estilos_generales.css">
-    <title>Consultar Vehículos</title>
+    <link rel="stylesheet" href="../static/css/tablas.css">
+    <title>Lista de Vehículos</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Vehículos en el Parqueadero</h1>
-        <table>
-            <thead>
+    <h1>Lista de Vehículos</h1>
+
+    {% if vehiculos %}
+        <table border="1">
+            <tr>
+                <th>ID</th>
+                <th>Placa</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Color</th>
+                <th>Tipo</th>
+                <th>ID Dueño</th>
+                <th>Activo</th>
+            </tr>
+            {% for vehiculo in vehiculos %}
                 <tr>
-                    <th>Placa</th>
-                    <th>Marca</th>
-                    <th>Modelo</th>
-                    <th>Color</th>
-                    <th>Tipo</th>
+                    <td>{{ vehiculo.id_vehiculo }}</td>
+                    <td>{{ vehiculo.placa }}</td>
+                    <td>{{ vehiculo.marca }}</td>
+                    <td>{{ vehiculo.modelo }}</td>
+                    <td>{{ vehiculo.color }}</td>
+                    <td>{{ vehiculo.tipo }}</td>
+                    <td>{{ vehiculo.id_duenio }}</td>
+                    <td>{{ vehiculo.activo }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                <!-- Filas de ejemplo, se generarán dinámicamente -->
-                <tr>
-                    <td>ABC123</td>
-                    <td>Chevrolet</td>
-                    <td>2020</td>
-                    <td>Rojo</td>
-                    <td>Carro</td>
-                </tr>
-            </tbody>
+            {% endfor %}
         </table>
-        <button onclick="location.href='/menu'">Volver al Menú</button>
-    </div>
+    {% else %}
+        <p>No hay vehículos registrados.</p>
+    {% endif %}
 </body>
 </html>
