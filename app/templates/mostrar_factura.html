@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura</title>
+    <link rel="stylesheet" href="../static/css/tablas.css">
+</head>
+<body>
+
+    <h1>Factura</h1>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <td>{{ factura.id_factura }}</td>
+        </tr>
+        <tr>
+            <th>Fecha y Hora de Ingreso</th>
+            <td>{{ factura.estancia.fecha_hora_entrada }}</td>
+        </tr>
+        <tr>
+            <th>Fecha y Hora de Salida</th>
+            <td>{{ factura.estancia.fecha_hora_salida }}</td>
+        </tr>
+        <tr>
+            <th>Monto</th>
+            <td>{{ factura.monto }}</td>
+        </tr>
+        <tr>
+            <th>Placa Vehiculo</th>
+            <td>{{ factura.vehiculo.placa }}</td>
+        </tr>
+        <tr>
+            <th>Cedula del Dueño del Vehiculo</th>
+            <td>{{ factura.duenio.cedula }}</td>
+        </tr>
+    </table>
+
+</body>
+</html>

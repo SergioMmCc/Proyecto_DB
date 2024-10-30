@@ -250,9 +250,6 @@ def salida():
                 # Hora de salida
                 estancia.fecha_hora_salida = datetime.now()
 
-                # Actualizar estado de la estancia a 'finalizada'
-                estancia.estado = 'finalizada'
-
                 # Actualizar estado de la plaza a 'disponible'
                 plaza = Plazas.query.get(estancia.id_plaza)
                 if plaza:
@@ -267,17 +264,30 @@ def salida():
                 # Generar la factura
                 factura = generar_factura(vehiculo, duenio)
 
-                if session.get('usuario') == 'admin':
-                    return render_template('menu_admin.html')
-                else:
-                    return render_template('menu.html')
-                # return render_template('factura.html', factura=factura)
+                # Actualizar estado de la estancia a 'finalizada'
+                estancia.estado = 'finalizada'
+                db.session.commit()
+
+                # Guardar los datos en la sesión
+                session['id_factura'] = factura.id_factura
+
+                return redirect(url_for('main.mostrar_factura'))
+                # return render_template('menu.html')
             else:
                 return "El vehiculo ya no se encuentra en el parqueadero.", 404
         else:
             return "La cédula no coincide con el duenio del vehículo.", 403
 
     return render_template('salida.html')
+
+# Ruta para mostrar la factura
+@main.route('/mostrar_factura', methods=['GET'])
+def mostrar_factura():
+    id_factura = session.get('id_factura')
+
+    factura = Facturas.query.get(id_factura)
+
+    return render_template('mostrar_factura.html', factura=factura)
 
 # Ruta para buscar empleados
 @main.route('/cedula_empleado', methods=['GET', 'POST'])

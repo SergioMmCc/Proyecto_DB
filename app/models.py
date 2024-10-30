@@ -57,6 +57,12 @@ class Facturas(db.Model):
     id_vehiculo = db.Column(db.Integer, db.ForeignKey('vehiculos.id_vehiculo'), nullable=False, index=True)
     id_duenio = db.Column(db.Integer, db.ForeignKey('duenios.id_duenio'), nullable=False, index=False)
 
+    # Relaciones con otros modelos
+    vehiculo = db.relationship('Vehiculos', backref='facturas')
+    estancia = db.relationship('RegistroEstancias', backref='facturas')
+    duenio = db.relationship('Duenios', backref='facturas')
+
+
 # Tabla empleados
 class Empleados(db.Model):
     __tablename__ = 'empleados'
